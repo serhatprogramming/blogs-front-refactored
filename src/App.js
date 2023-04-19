@@ -7,6 +7,15 @@ import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import BlogForm from "./components/BlogForm";
+// reducers
+import {
+  addInfoNotification,
+  addWarningNotification,
+  removeNotification,
+} from "./reducers/notificationReducer";
+import notificationReducer from "./reducers/notificationReducer";
+// redux
+import { useSelector, useDispatch } from "react-redux";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -15,10 +24,12 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [token, setToken] = useState(null);
 
-  const [notification, setNotification] = useState(null);
-
   const blogFormRef = useRef();
 
+  //======================================================//
+  // redux store
+  const dispatch = useDispatch();
+  const notification = useSelector((state) => state.notifications);
   //======================================================//
   useEffect(() => {
     const userLocalStorage = JSON.parse(
@@ -147,13 +158,14 @@ const App = () => {
   };
   //======================================================//
 
-  const showNotification = (message) => {
-    setNotification({
-      notification: message.content,
-      notificationStyle: message.style,
-    });
+  const showNotification = ({ content, style }) => {
+    if (style === "info") {
+      dispatch(addInfoNotification(content));
+    } else if (style === "error") {
+      dispatch(addWarningNotification(content));
+    }
     setTimeout(() => {
-      setNotification(null);
+      dispatch(removeNotification());
     }, 1000);
   };
   //======================================================//
