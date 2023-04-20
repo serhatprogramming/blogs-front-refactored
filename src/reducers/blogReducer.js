@@ -18,15 +18,33 @@ const blogSlice = createSlice({
     appendBlog(state, action) {
       state.push(action.payload);
     },
+    updateBlogs(state, action) {
+      return state.map((blog) =>
+        blog.id === action.payload.id
+          ? { ...blog, likes: blog.likes + 1 }
+          : blog
+      );
+    },
   },
 });
 
-export const { setBlogs, appendBlog } = blogSlice.actions;
+export const { setBlogs, appendBlog, updateBlogs } = blogSlice.actions;
 
 export const initializeBlogs = (token) => {
   return async (dispatch) => {
     const blogs = await blogService.getAll(token);
     dispatch(setBlogs(blogs));
+  };
+};
+
+export const updateBlog = (blog, token) => {
+  return async (dispatch) => {
+    const updatedBlog = await blogService.updateBlog(
+      { ...blog, likes: blog.likes + 1 },
+      token
+    );
+
+    dispatch(updateBlogs(updatedBlog.data));
   };
 };
 
