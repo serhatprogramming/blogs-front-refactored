@@ -9,13 +9,12 @@ import { loginLocalStorage } from "./reducers/loginReducer";
 import { useSelector, useDispatch } from "react-redux";
 
 const App = () => {
-  const blogFormRef = useRef();
-
   //======================================================//
   // redux store
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   //======================================================//
+  // initial user and trigger loading the blogs
   useEffect(() => {
     const userLocalStorage = JSON.parse(
       window.localStorage.getItem("loggedBlogUser")
@@ -25,6 +24,7 @@ const App = () => {
     }
   }, []);
 
+  // final return of the APP
   return <>{user ? <Blogs /> : <Login />}</>;
 };
 
