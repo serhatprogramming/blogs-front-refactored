@@ -25,8 +25,9 @@ const Blog = ({ blog, token, username }) => {
   };
 
   const removeBlog = () => {
-    window.confirm(`Remove blog ${blog.title} by ${blog.author}`);
-    dispatch(eraseBlog(blog, token));
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      dispatch(eraseBlog(blog, token));
+    }
   };
 
   return (

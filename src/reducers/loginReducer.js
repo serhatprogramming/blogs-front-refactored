@@ -3,6 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 import loginService from "../services/login";
 // blog reducer actions
 import { initializeBlogs } from "./blogReducer";
+// notification reducer actions
+import {
+  addWarningNotification,
+  removeNotification,
+} from "../reducers/notificationReducer";
 
 const loginSlice = createSlice({
   name: "user",
@@ -18,11 +23,18 @@ export const { setUser } = loginSlice.actions;
 
 export const login = (username, password) => {
   return async (dispatch) => {
-    const loggedUser = await loginService.login(username, password);
-    const returnedToken = loginService.setToken(loggedUser.token);
-    dispatch(initializeBlogs(returnedToken));
-    window.localStorage.setItem("loggedBlogUser", JSON.stringify(loggedUser));
-    dispatch(setUser({ ...loggedUser, returnedToken }));
+    try {
+      const loggedUser = await loginService.login(username, password);
+      const returnedToken = loginService.setToken(loggedUser.token);
+      dispatch(initializeBlogs(returnedToken));
+      window.localStorage.setItem("loggedBlogUser", JSON.stringify(loggedUser));
+      dispatch(setUser({ ...loggedUser, returnedToken }));
+    } catch (error) {
+      dispatch(addWarningNotification("Wrong Credentials"));
+      setTimeout(() => {
+        dispatch(removeNotification());
+      }, 1000);
+    }
   };
 };
 
