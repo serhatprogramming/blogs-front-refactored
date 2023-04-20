@@ -3,17 +3,18 @@ import { useState, useEffect, useRef } from "react";
 import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
+import BlogForm from "./components/BlogForm";
 //services
 import blogService from "./services/blogs";
 import loginService from "./services/login";
-import BlogForm from "./components/BlogForm";
-// reducers
+// notification reducer actions
 import {
   addInfoNotification,
   addWarningNotification,
   removeNotification,
 } from "./reducers/notificationReducer";
-import notificationReducer from "./reducers/notificationReducer";
+// blog reducer actions
+import { initializeBlogs } from "./reducers/blogReducer";
 // redux
 import { useSelector, useDispatch } from "react-redux";
 
@@ -30,6 +31,7 @@ const App = () => {
   // redux store
   const dispatch = useDispatch();
   const notification = useSelector((state) => state.notifications);
+  const blogsComingReduxStore = useSelector((state) => state.blogs);
   //======================================================//
   useEffect(() => {
     const userLocalStorage = JSON.parse(
@@ -40,14 +42,16 @@ const App = () => {
       const returnedToken = loginService.setToken(userLocalStorage.token);
       setToken(returnedToken);
       blogService.getAll(returnedToken).then((blogs) => setBlogs(blogs));
+      dispatch(initializeBlogs(returnedToken));
     }
   }, []);
+
   //======================================================//
   const showLogin = () => (
     <>
       <h3>login to application</h3>
       <Notification notification={notification} />
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleLogin}>
         <div>
           username
           <input
@@ -84,7 +88,7 @@ const App = () => {
         <button onClick={handleLogout}>logout</button>{" "}
       </p>
       {createNewBlog()}
-      {blogs
+      {[...blogsComingReduxStore]
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
           <Blog
@@ -132,7 +136,7 @@ const App = () => {
   );
   //======================================================//
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const loggedUser = await loginService.login(username, password);
