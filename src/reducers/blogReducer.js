@@ -25,10 +25,14 @@ const blogSlice = createSlice({
           : blog
       );
     },
+    removeBlog(state, action) {
+      return state.filter((blog) => blog.id !== action.payload);
+    },
   },
 });
 
-export const { setBlogs, appendBlog, updateBlogs } = blogSlice.actions;
+export const { setBlogs, appendBlog, updateBlogs, removeBlog } =
+  blogSlice.actions;
 
 export const initializeBlogs = (token) => {
   return async (dispatch) => {
@@ -45,6 +49,18 @@ export const updateBlog = (blog, token) => {
     );
 
     dispatch(updateBlogs(updatedBlog.data));
+  };
+};
+
+export const eraseBlog = (blog, token) => {
+  return async (dispatch) => {
+    const removedBlog = await blogService.deleteBlog(blog, token);
+    console.log("man what just had happened: ", removedBlog);
+    dispatch(removeBlog(blog.id));
+    dispatch(addWarningNotification(`${blog.title} is removed.`));
+    setTimeout(() => {
+      dispatch(removeNotification());
+    }, 1000);
   };
 };
 

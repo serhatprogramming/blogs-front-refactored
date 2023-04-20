@@ -1,9 +1,7 @@
 import { useState } from "react";
 
-import blogService from "../services/blogs";
-
 // blog reducer actions
-import { updateBlog } from "../reducers/blogReducer";
+import { updateBlog, eraseBlog } from "../reducers/blogReducer";
 // redux
 import { useDispatch } from "react-redux";
 
@@ -28,6 +26,7 @@ const Blog = ({ blog, token, username }) => {
 
   const removeBlog = () => {
     window.confirm(`Remove blog ${blog.title} by ${blog.author}`);
+    dispatch(eraseBlog(blog, token));
   };
 
   return (
