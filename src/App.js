@@ -4,24 +4,21 @@ import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 import BlogForm from "./components/BlogForm";
-//services
-import loginService from "./services/login";
 // notification reducer actions
 import {
-  addInfoNotification,
   addWarningNotification,
   removeNotification,
 } from "./reducers/notificationReducer";
 // blog reducer actions
-import { initializeBlogs, createBlog } from "./reducers/blogReducer";
+import { createBlog } from "./reducers/blogReducer";
+// login reducer actions
+import { setUser, login, loginLocalStorage } from "./reducers/loginReducer";
 // redux
 import { useSelector, useDispatch } from "react-redux";
 
 const App = () => {
-  const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState(null);
 
   const blogFormRef = useRef();
 
@@ -30,16 +27,14 @@ const App = () => {
   const dispatch = useDispatch();
   const notification = useSelector((state) => state.notifications);
   const blogs = useSelector((state) => state.blogs);
+  const user = useSelector((state) => state.user);
   //======================================================//
   useEffect(() => {
     const userLocalStorage = JSON.parse(
       window.localStorage.getItem("loggedBlogUser")
     );
     if (userLocalStorage) {
-      setUser(userLocalStorage);
-      const returnedToken = loginService.setToken(userLocalStorage.token);
-      setToken(returnedToken);
-      dispatch(initializeBlogs(returnedToken));
+      dispatch(loginLocalStorage(userLocalStorage));
     }
   }, []);
 
@@ -91,7 +86,7 @@ const App = () => {
           <Blog
             key={blog.id}
             blog={blog}
-            token={token}
+            token={user.returnedToken}
             username={user.username}
           />
         ))}
@@ -107,7 +102,7 @@ const App = () => {
       url,
       user: user.id,
     };
-    dispatch(createBlog(newBlog, token));
+    dispatch(createBlog(newBlog, user.returnedToken));
   };
   //======================================================//
 
@@ -121,12 +116,7 @@ const App = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const loggedUser = await loginService.login(username, password);
-      setUser(loggedUser);
-      const returnedToken = loginService.setToken(loggedUser.token);
-      setToken(returnedToken);
-      dispatch(initializeBlogs(returnedToken));
-      window.localStorage.setItem("loggedBlogUser", JSON.stringify(loggedUser));
+      dispatch(login(username, password));
     } catch (error) {
       dispatch(addWarningNotification("Wrong Credentials"));
       setTimeout(() => {
@@ -138,7 +128,7 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.clear();
-    setUser(null);
+    dispatch(setUser(null));
   };
   //======================================================//
 
